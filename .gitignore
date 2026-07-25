@@ -1,0 +1,21 @@
+# Virtual Environment
+.venv/
+
+# Secrets
+.env
+
+# Python Cache
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store
+
+# Logs
+logs/
+
+# IDE
+.vscode/
+
+# Pytest
+.pytest_cache/
