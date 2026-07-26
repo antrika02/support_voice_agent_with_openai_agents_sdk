@@ -56,3 +56,10 @@ GEMINI_MODEL = get_env_variable(
     "GEMINI_MODEL",
     default="gemini-3.5-flash"
 )
+
+MAX_CONVERSATION_MESSAGES = int(
+    get_env_variable(
+        "MAX_CONVERSATION_MESSAGES",
+        default="10"
+    )
+)
