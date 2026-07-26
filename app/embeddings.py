@@ -26,12 +26,6 @@ class EmbeddingGenerator:
 
         for chunk in chunks:
             vector = self.embed_chunk(chunk)
-
-            embeddings.append(
-                {
-                    "chunk": chunk,
-                    "embedding": vector,
-                }
-            )
+            embeddings.append(vector)
 
         return embeddings

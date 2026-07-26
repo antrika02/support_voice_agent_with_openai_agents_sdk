@@ -1,7 +1,12 @@
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import Distance, VectorParams
+from qdrant_client.models import PointStruct
+
+import uuid
 
 from config import COLLECTION_NAME
+from app.models import Chunk
+
 
 class VectorStore:
     """
@@ -30,7 +35,6 @@ class VectorStore:
         """
 
         collections = self.client.get_collections().collections
-
         existing_collections = [c.name for c in collections]
 
         if COLLECTION_NAME in existing_collections:
@@ -42,14 +46,45 @@ class VectorStore:
             vectors_config=VectorParams(
                 size=vector_size,
                 distance=Distance.COSINE
+            )
         )
-    )
 
-    print(f"Collection '{COLLECTION_NAME}' created successfully!")
+        print(f"Collection '{COLLECTION_NAME}' created successfully!")
 
-    def store_embeddings(self):
-        """Store embeddings in Qdrant."""
-        pass
+    def store_embeddings(
+        self,
+        chunks: list[Chunk],
+        embeddings: list[list[float]]
+    ):
+        """
+        Store chunk embeddings inside Qdrant.
+        """
+
+        points = []
+
+        for chunk, embedding in zip(chunks, embeddings):
+
+            point = PointStruct(
+                id=str(uuid.uuid4()),
+                vector=embedding,
+                payload={
+                    "id": chunk.id,
+                    "title": chunk.document_title,
+                    "content": chunk.content,
+                    "url": chunk.source_url,
+                    "chunk_number": chunk.chunk_number,
+                    "metadata": chunk.metadata,
+                }
+            )
+
+            points.append(point)
+
+        self.client.upsert(
+            collection_name=COLLECTION_NAME,
+            points=points
+        )
+
+        print(f"Stored {len(points)} embeddings.")
 
     def search(self):
         """Search for similar embeddings."""
