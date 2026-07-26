@@ -41,3 +41,18 @@ VOICE_NAME = get_env_variable(
     "VOICE_NAME",
     default="en-US-AriaNeural"
 )
+
+GEMINI_API_KEY = get_env_variable(
+    "GEMINI_API_KEY",
+    required=True
+)
+
+LLM_PROVIDER = get_env_variable(
+    "LLM_PROVIDER",
+    default="gemini"
+)
+
+GEMINI_MODEL = get_env_variable(
+    "GEMINI_MODEL",
+    default="gemini-3.5-flash"
+)
