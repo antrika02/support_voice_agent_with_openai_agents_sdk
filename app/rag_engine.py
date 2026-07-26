@@ -25,6 +25,10 @@ class RAGEngine:
             results
         )
 
+        print("=" * 80)
+        print(prompt)
+        print("=" * 80)
+
         response = self.llm.generate(prompt)
 
         return response

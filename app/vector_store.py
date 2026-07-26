@@ -105,5 +105,27 @@ class VectorStore:
         return results.points
 
     def delete_collection(self):
-        """Delete a collection."""
-        pass
+
+        """
+
+        Delete the collection if it exists.
+
+        """
+
+        collections = self.client.get_collections().collections
+
+        existing = [c.name for c in collections]
+
+        if COLLECTION_NAME in existing:
+
+            self.client.delete_collection(
+
+                collection_name=COLLECTION_NAME
+
+            )
+
+            print(f"Deleted '{COLLECTION_NAME}'.")
+
+        else:
+
+            print("Collection does not exist.")

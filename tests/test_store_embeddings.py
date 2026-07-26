@@ -9,13 +9,17 @@ from config import (
 )
 
 document = Document(
-    title="Python",
+    title="Python Programming",
     content="""
-Python is easy to learn.
-Python supports OOP.
-Python supports functional programming.
-Python has automatic memory management.
-Python has a huge ecosystem.
+Python is a high-level, interpreted programming language known for its simple syntax and readability.
+
+Python supports object-oriented programming through classes and objects. Developers can create reusable classes, instantiate objects, use inheritance, encapsulation, and polymorphism to organize code effectively.
+
+Python also supports functional programming using functions such as map(), filter(), lambda expressions, and comprehensions.
+
+Python includes automatic memory management through reference counting and a garbage collector that frees unused memory automatically.
+
+Because of its extensive standard library and large ecosystem, Python is widely used for web development, data science, artificial intelligence, automation, and scripting.
 """,
     url="https://python.org"
 )
@@ -34,6 +38,9 @@ store = VectorStore(
 )
 
 store.connect()
+store.create_collection(
+    vector_size=384
+)
 
 store.store_embeddings(
     chunks,
