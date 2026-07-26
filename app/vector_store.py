@@ -86,9 +86,23 @@ class VectorStore:
 
         print(f"Stored {len(points)} embeddings.")
 
-    def search(self):
-        """Search for similar embeddings."""
-        pass
+
+    def search(
+        self,
+        query_embedding: list[float],
+        limit: int = 3,
+):
+        """
+        Search for similar document chunks.
+        """
+
+        results = self.client.query_points(
+            collection_name=COLLECTION_NAME,
+            query=query_embedding,
+            limit=limit,
+       )
+
+        return results.points
 
     def delete_collection(self):
         """Delete a collection."""

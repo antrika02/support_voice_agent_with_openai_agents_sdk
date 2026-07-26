@@ -11,6 +11,13 @@ class EmbeddingGenerator:
     def __init__(self):
         self.model = TextEmbedding()
 
+    def embed_text(self, text: str):
+        """
+        Generate an embedding for any text.
+        """
+        embedding = list(self.model.embed([text]))[0]
+        return embedding.tolist()
+
     def embed_chunk(self, chunk: Chunk):
         """
         Generate an embedding for a single chunk.
