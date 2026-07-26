@@ -1,5 +1,7 @@
 from qdrant_client import QdrantClient
+from qdrant_client.http.models import Distance, VectorParams
 
+from config import COLLECTION_NAME
 
 class VectorStore:
     """
@@ -22,9 +24,28 @@ class VectorStore:
 
         return self.client
 
-    def create_collection(self):
-        """Create a collection if it doesn't exist."""
-        pass
+    def create_collection(self, vector_size: int):
+        """
+        Creates the collection if it doesn't already exist.
+        """
+
+        collections = self.client.get_collections().collections
+
+        existing_collections = [c.name for c in collections]
+
+        if COLLECTION_NAME in existing_collections:
+            print(f"Collection '{COLLECTION_NAME}' already exists.")
+            return
+
+        self.client.create_collection(
+            collection_name=COLLECTION_NAME,
+            vectors_config=VectorParams(
+                size=vector_size,
+                distance=Distance.COSINE
+        )
+    )
+
+    print(f"Collection '{COLLECTION_NAME}' created successfully!")
 
     def store_embeddings(self):
         """Store embeddings in Qdrant."""

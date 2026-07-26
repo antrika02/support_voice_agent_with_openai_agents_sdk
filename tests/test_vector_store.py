@@ -1,4 +1,8 @@
-from config import QDRANT_URL, QDRANT_API_KEY
+from config import (
+    QDRANT_URL,
+    QDRANT_API_KEY,
+)
+
 from app.vector_store import VectorStore
 
 store = VectorStore(
@@ -6,10 +10,8 @@ store = VectorStore(
     api_key=QDRANT_API_KEY
 )
 
-client = store.connect()
+store.connect()
 
-print("✅ Connected to Qdrant!")
+store.create_collection(vector_size=384)
 
-collections = client.get_collections()
-
-print(collections)
+print("Setup Complete!")
