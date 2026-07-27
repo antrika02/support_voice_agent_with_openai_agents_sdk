@@ -4,7 +4,11 @@ from qdrant_client.models import PointStruct
 
 import uuid
 
-from config import COLLECTION_NAME
+from config import (
+    COLLECTION_NAME,
+    UPSERT_BATCH_SIZE,
+)
+
 from app.models import Chunk
 
 
@@ -22,16 +26,17 @@ class VectorStore:
         """
         Establish a connection to Qdrant.
         """
+
         self.client = QdrantClient(
             url=self.url,
-            api_key=self.api_key
+            api_key=self.api_key,
         )
 
         return self.client
 
     def create_collection(self, vector_size: int):
         """
-        Creates the collection if it doesn't already exist.
+        Create the collection if it does not already exist.
         """
 
         collections = self.client.get_collections().collections
@@ -45,8 +50,8 @@ class VectorStore:
             collection_name=COLLECTION_NAME,
             vectors_config=VectorParams(
                 size=vector_size,
-                distance=Distance.COSINE
-            )
+                distance=Distance.COSINE,
+            ),
         )
 
         print(f"Collection '{COLLECTION_NAME}' created successfully!")
@@ -54,10 +59,10 @@ class VectorStore:
     def store_embeddings(
         self,
         chunks: list[Chunk],
-        embeddings: list[list[float]]
+        embeddings: list[list[float]],
     ):
         """
-        Store chunk embeddings inside Qdrant.
+        Store chunk embeddings inside Qdrant using batched uploads.
         """
 
         points = []
@@ -74,24 +79,44 @@ class VectorStore:
                     "url": chunk.source_url,
                     "chunk_number": chunk.chunk_number,
                     "metadata": chunk.metadata,
-                }
+                },
             )
 
             points.append(point)
 
-        self.client.upsert(
-            collection_name=COLLECTION_NAME,
-            points=points
-        )
+        total_batches = (
+            len(points) + UPSERT_BATCH_SIZE - 1
+        ) // UPSERT_BATCH_SIZE
 
-        print(f"Stored {len(points)} embeddings.")
+        for batch_number in range(total_batches):
 
+            start = batch_number * UPSERT_BATCH_SIZE
+
+            end = min(
+                start + UPSERT_BATCH_SIZE,
+                len(points),
+            )
+
+            batch = points[start:end]
+
+            print(
+                f"Uploading batch "
+                f"{batch_number + 1}/{total_batches} "
+                f"({len(batch)} vectors)"
+            )
+
+            self.client.upsert(
+                collection_name=COLLECTION_NAME,
+                points=batch,
+            )
+
+        print(f"\nStored {len(points)} embeddings.")
 
     def search(
         self,
         query_embedding: list[float],
         limit: int = 3,
-):
+    ):
         """
         Search for similar document chunks.
         """
@@ -100,28 +125,25 @@ class VectorStore:
             collection_name=COLLECTION_NAME,
             query=query_embedding,
             limit=limit,
-       )
+        )
 
         return results.points
 
     def delete_collection(self):
-
         """
-
         Delete the collection if it exists.
-
         """
 
         collections = self.client.get_collections().collections
 
-        existing = [c.name for c in collections]
+        existing_collections = [
+            c.name for c in collections
+        ]
 
-        if COLLECTION_NAME in existing:
+        if COLLECTION_NAME in existing_collections:
 
             self.client.delete_collection(
-
-                collection_name=COLLECTION_NAME
-
+                collection_name=COLLECTION_NAME,
             )
 
             print(f"Deleted '{COLLECTION_NAME}'.")

@@ -6,6 +6,8 @@ from app.vector_store import VectorStore
 from config import (
     QDRANT_URL,
     QDRANT_API_KEY,
+    KNOWLEDGE_BASE_NAME,
+    CRAWL_URL,
 )
 
 document = Document(

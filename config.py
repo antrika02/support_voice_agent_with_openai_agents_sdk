@@ -11,7 +11,6 @@ def get_env_variable(name: str, default=None, required=False):
 
     return value
 
-
 FIRECRAWL_API_KEY = get_env_variable(
     "FIRECRAWL_API_KEY",
     required=True
@@ -81,5 +80,21 @@ MIN_CONFIDENCE = float(
     get_env_variable(
         "MIN_CONFIDENCE",
         default="0.60"
+    )
+)
+KNOWLEDGE_BASE_NAME = get_env_variable(
+    "KNOWLEDGE_BASE_NAME",
+    default="Python Documentation"
+)
+
+CRAWL_URL = get_env_variable(
+    "CRAWL_URL",
+    default="https://docs.python.org/3/"
+)
+
+UPSERT_BATCH_SIZE = int(
+    get_env_variable(
+        "UPSERT_BATCH_SIZE",
+        default="100"
     )
 )
