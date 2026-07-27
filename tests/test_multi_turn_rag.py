@@ -1,4 +1,4 @@
-from app.rag_engine import RAGEngine
+from app.rag.rag_engine import RAGEngine
 
 rag = RAGEngine()
 

@@ -1,8 +1,8 @@
-from app.retriever import Retriever
-from app.prompt_builder import PromptBuilder
+from app.retrieval.retriever import Retriever
+from app.rag.prompt_builder import PromptBuilder
 from app.llm.factory import LLMFactory
 from app.memory.conversation import Conversation
-from app.confidence import ConfidenceCalculator
+from app.rag.confidence import ConfidenceCalculator
 from config import MAX_CONVERSATION_MESSAGES
 from app.response import (
 
@@ -43,7 +43,7 @@ class RAGEngine:
         )
 
         print("=" * 80)
-        print(prompt)
+        print(f"Prompt length: {len(prompt)} characters")
         print("=" * 80)
 
         answer = self.llm.generate(prompt)

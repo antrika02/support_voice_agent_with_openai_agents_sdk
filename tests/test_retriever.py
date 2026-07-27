@@ -1,4 +1,4 @@
-from app.retriever import Retriever
+from app.retrieval.retriever import Retriever
 
 retriever = Retriever()
 

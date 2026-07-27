@@ -1,4 +1,4 @@
-from app.crawler import DocumentationCrawler
+from app.ingestion.crawler import DocumentationCrawler
 
 crawler = DocumentationCrawler()
 

@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.rag_engine import RAGEngine
+from app.rag.rag_engine import RAGEngine
 from app.api.schemas import (
     ChatRequest,
     ChatResponse,

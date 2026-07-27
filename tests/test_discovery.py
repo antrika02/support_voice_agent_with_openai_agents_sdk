@@ -1,4 +1,4 @@
-from app.discovery import DocumentationDiscovery
+from app.ingestion.discovery import DocumentationDiscovery
 
 from config import CRAWL_URL
 

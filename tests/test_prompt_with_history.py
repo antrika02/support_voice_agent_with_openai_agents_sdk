@@ -1,4 +1,4 @@
-from app.prompt_builder import PromptBuilder
+from app.rag.prompt_builder import PromptBuilder
 from app.memory.conversation import Conversation
 
 

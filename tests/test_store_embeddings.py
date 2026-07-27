@@ -1,7 +1,7 @@
 from app.models import Document
 from app.chunker import DocumentChunker
-from app.embeddings import EmbeddingGenerator
-from app.vector_store import VectorStore
+from app.retrieval.embeddings import EmbeddingGenerator
+from app.retrieval.vector_store import VectorStore
 
 from config import (
     QDRANT_URL,
