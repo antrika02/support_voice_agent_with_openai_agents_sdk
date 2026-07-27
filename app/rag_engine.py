@@ -2,7 +2,7 @@ from app.retriever import Retriever
 from app.prompt_builder import PromptBuilder
 from app.llm.factory import LLMFactory
 from app.memory.conversation import Conversation
-
+from app.confidence import ConfidenceCalculator
 from config import MAX_CONVERSATION_MESSAGES
 from app.response import (
 
@@ -34,6 +34,7 @@ class RAGEngine:
         self.conversation.add_user_message(question)
 
         results = self.retriever.retrieve(question)
+        confidence = ConfidenceCalculator.calculate(results)
   
         prompt = self.prompt_builder.build(
             question=question,
@@ -71,5 +72,6 @@ class RAGEngine:
 
         return RAGResponse(
             answer=answer,
-            sources=sources
-       )
+            sources=sources,
+            confidence=confidence
+        )

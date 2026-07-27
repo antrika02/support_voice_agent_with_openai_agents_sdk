@@ -63,3 +63,16 @@ MAX_CONVERSATION_MESSAGES = int(
         default="10"
     )
 )
+TOP_K = int(
+    get_env_variable(
+        "TOP_K",
+        default="3"
+    )
+)
+
+MIN_CONFIDENCE = float(
+    get_env_variable(
+        "MIN_CONFIDENCE",
+        default="0.60"
+    )
+)
