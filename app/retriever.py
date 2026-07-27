@@ -4,6 +4,8 @@ from app.vector_store import VectorStore
 from config import (
     QDRANT_URL,
     QDRANT_API_KEY,
+    TOP_K,
+    MIN_RETRIEVAL_SCORE,
 )
 
 
@@ -25,11 +27,14 @@ class Retriever:
     def retrieve(
         self,
         question: str,
-        limit: int = 3
+        limit: int | None = None
     ):
         """
         Retrieve the most relevant chunks for a question.
         """
+
+        if limit is None:
+            limit = TOP_K
 
         question_embedding = self.embedder.embed_text(question)
 
@@ -38,4 +43,16 @@ class Retriever:
             limit=limit
         )
 
-        return results
+        filtered_results = []
+
+    # Always keep the best result
+        if results:
+            filtered_results.append(results[0])
+
+    # Filter the remaining results
+        for result in results[1:]:
+
+            if result.score >= MIN_RETRIEVAL_SCORE:
+                filtered_results.append(result)
+
+        return filtered_results

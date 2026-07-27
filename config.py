@@ -70,6 +70,13 @@ TOP_K = int(
     )
 )
 
+MIN_RETRIEVAL_SCORE = float(
+    get_env_variable(
+        "MIN_RETRIEVAL_SCORE",
+        default="0.70"
+    )
+)
+
 MIN_CONFIDENCE = float(
     get_env_variable(
         "MIN_CONFIDENCE",

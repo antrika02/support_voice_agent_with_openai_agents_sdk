@@ -6,12 +6,13 @@ results = retriever.retrieve(
     "How does Python support object-oriented programming?"
 )
 
-print("=" * 60)
+print("=" * 80)
+
+print(f"Retrieved {len(results)} chunks")
+
+print("=" * 80)
 
 for result in results:
-
-    print("Score:", result.score)
-
+    print(f"Score: {result.score:.4f}")
     print(result.payload["content"])
-
-    print("=" * 60)
+    print("-" * 80)
