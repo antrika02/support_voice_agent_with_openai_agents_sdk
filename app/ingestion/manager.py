@@ -3,9 +3,9 @@ from app.ingestion.crawler import DocumentationCrawler
 from app.chunker import DocumentChunker
 from app.retrieval.embeddings import EmbeddingGenerator
 from app.retrieval.vector_store import VectorStore
+from app.logging import get_logger
 
 from config import (
-    CRAWL_URL,
     QDRANT_URL,
     QDRANT_API_KEY,
 )
@@ -28,32 +28,42 @@ class KnowledgeBaseManager:
 
         self.vector_store = VectorStore(
             QDRANT_URL,
-            QDRANT_API_KEY
+            QDRANT_API_KEY,
         )
 
         self.vector_store.connect()
+
+        self.logger = get_logger(__name__)
 
     def ingest(self, crawl_url: str):
         """
         Discover → Crawl → Chunk → Embed → Store
         """
 
-        print("Step 1: Discovering documentation pages...")
+        self.logger.info(
+            "Discovering documentation pages..."
+        )
 
         urls = self.discovery.discover(
             crawl_url,
-            max_pages=50
+            max_pages=50,
         )
 
-        print(f"Discovered {len(urls)} pages.")
+        self.logger.info(
+            f"Discovered {len(urls)} pages."
+        )
 
         documents = []
 
-        print("Step 2: Crawling pages...")
+        self.logger.info(
+            "Crawling documentation pages..."
+        )
 
         for index, url in enumerate(urls, start=1):
 
-            print(f"[{index}/{len(urls)}] {url}")
+            self.logger.info(
+                f"[{index}/{len(urls)}] {url}"
+            )
 
             try:
 
@@ -63,13 +73,19 @@ class KnowledgeBaseManager:
 
             except Exception as e:
 
-                print(f"Failed: {e}")
+                self.logger.exception(
+                    f"Failed to crawl {url}: {e}"
+                )
 
-        print(f"Crawled {len(documents)} document(s).")
+        self.logger.info(
+            f"Crawled {len(documents)} documents."
+        )
 
         chunks = []
 
-        print("Step 3: Chunking...")
+        self.logger.info(
+            "Chunking documents..."
+        )
 
         for document in documents:
 
@@ -77,23 +93,33 @@ class KnowledgeBaseManager:
                 self.chunker.chunk_document(document)
             )
 
-        print(f"Created {len(chunks)} chunk(s).")
+        self.logger.info(
+            f"Created {len(chunks)} chunks."
+        )
 
-        print("Step 4: Generating embeddings...")
+        self.logger.info(
+            "Generating embeddings..."
+        )
 
         embeddings = self.embedder.embed_chunks(chunks)
 
-        print("Step 5: Creating collection...")
+        self.logger.info(
+            "Creating collection..."
+        )
 
         self.vector_store.create_collection(
             vector_size=384
         )
 
-        print("Step 6: Uploading to Qdrant...")
+        self.logger.info(
+            "Uploading embeddings..."
+        )
 
         self.vector_store.store_embeddings(
             chunks,
-            embeddings
+            embeddings,
         )
 
-        print("Knowledge base successfully indexed.")
+        self.logger.info(
+            "Knowledge base successfully indexed."
+        )

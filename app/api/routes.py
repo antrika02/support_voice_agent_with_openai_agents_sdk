@@ -1,84 +1,85 @@
-from fastapi import APIRouter, HTTPException
+import time
 
-from app.api.metrics import MetricsService
-
-from app.ingestion.manager import KnowledgeBaseManager
-from app.api.schemas import IngestionRequest
-from app.api.schemas import (
-    ChatRequest,
-    ChatResponse,
-    SourceResponse,
+from google import genai
+from google.genai.errors import (
+    ClientError,
+    ServerError,
 )
-from app.rag.rag_engine import RAGEngine
 
+from app.llm.base import BaseLLM
+from app.logging import get_logger
 
-router = APIRouter()
-
-rag = RAGEngine()
-metrics = MetricsService()
-ingestion = KnowledgeBaseManager()
-
-@router.post(
-    "/chat",
-    response_model=ChatResponse,
+from config import (
+    GEMINI_API_KEY,
+    GEMINI_MODEL,
 )
-def chat(request: ChatRequest):
 
-    try:
+logger = get_logger(__name__)
 
-        response = rag.answer(request.question)
 
-        return ChatResponse(
-            answer=response.answer,
-            confidence=response.confidence,
-            sources=[
-                SourceResponse(
-                    title=source.title,
-                    url=source.url,
+class GeminiLLM(BaseLLM):
+    """
+    Gemini implementation of the BaseLLM interface.
+    """
+
+    def __init__(self):
+        self.client = genai.Client(
+            api_key=GEMINI_API_KEY
+        )
+
+        self.model = GEMINI_MODEL
+
+    def generate(self, prompt: str) -> str:
+        """
+        Generate an answer using Gemini.
+
+        Retries automatically if Gemini is temporarily unavailable.
+        """
+
+        retries = 3
+
+        for attempt in range(retries):
+
+            try:
+
+                response = self.client.models.generate_content(
+                    model=self.model,
+                    contents=prompt,
                 )
-                for source in response.sources
-            ],
-        )
 
-    except Exception as e:
+                if response.text:
+                    return response.text
 
-        raise HTTPException(
-            status_code=500,
-            detail=str(e),
-        )
+                raise RuntimeError(
+                    "Gemini returned an empty response."
+                )
 
+            except ServerError:
 
-@router.get("/health")
-def health():
+                logger.warning(
+                    f"Gemini unavailable ({attempt + 1}/{retries})"
+                )
 
-    return {
-        "status": "healthy",
-        "service": "AI Documentation Assistant",
-        "version": "1.0.0",
-    }
+                if attempt < retries - 1:
+                    time.sleep(2)
+                    continue
 
+                raise RuntimeError(
+                    "Gemini service temporarily unavailable."
+                )
 
-@router.get("/metrics")
-def metrics_endpoint():
+            except ClientError as e:
 
-    return metrics.get_metrics()
+                logger.error(f"Gemini client error: {e}")
 
+                raise RuntimeError(
+                    "Gemini request failed."
+                )
 
-@router.post("/ingest")
-def ingest(request: IngestionRequest):
+            except Exception as e:
 
-    try:
+                logger.exception(e)
 
-        ingestion.ingest(request.url)
-
-        return {
-            "status": "success",
-            "message": "Knowledge base indexed successfully."
-        }
-
-    except Exception as e:
-
-        raise HTTPException(
-            status_code=500,
-            detail=str(e)
-        )
+                raise RuntimeError(
+                    "Unexpected error while generating response."
+                )

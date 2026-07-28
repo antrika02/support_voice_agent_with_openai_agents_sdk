@@ -1,49 +1,83 @@
+import uuid
+
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import Distance, VectorParams
 from qdrant_client.models import PointStruct
 
-import uuid
+from app.logging import get_logger
+from app.models import Chunk
 
 from config import (
     COLLECTION_NAME,
     UPSERT_BATCH_SIZE,
 )
 
-from app.models import Chunk
-
 
 class VectorStore:
     """
-    Handles storage and retrieval of embeddings in Qdrant.
+    Handles all interaction with Qdrant.
+
+    Responsibilities:
+    - Connect to Qdrant
+    - Create/Delete collections
+    - Store embeddings
+    - Retrieve relevant chunks
     """
 
-    def __init__(self, url: str, api_key: str):
+    def __init__(
+        self,
+        url: str,
+        api_key: str,
+    ):
         self.url = url
         self.api_key = api_key
-        self.client = None
+        self.client: QdrantClient | None = None
 
-    def connect(self):
+        self.logger = get_logger(__name__)
+
+    def connect(self) -> QdrantClient:
         """
         Establish a connection to Qdrant.
         """
 
-        self.client = QdrantClient(
-            url=self.url,
-            api_key=self.api_key,
-        )
+        if self.client is None:
+
+            self.logger.info(
+                "Connecting to Qdrant..."
+            )
+
+            self.client = QdrantClient(
+                url=self.url,
+                api_key=self.api_key,
+            )
+
+            self.logger.info(
+                "Connected to Qdrant."
+            )
 
         return self.client
 
-    def create_collection(self, vector_size: int):
+    def create_collection(
+        self,
+        vector_size: int,
+    ) -> None:
         """
         Create the collection if it does not already exist.
         """
 
         collections = self.client.get_collections().collections
-        existing_collections = [c.name for c in collections]
 
-        if COLLECTION_NAME in existing_collections:
-            print(f"Collection '{COLLECTION_NAME}' already exists.")
+        existing = {
+            collection.name
+            for collection in collections
+        }
+
+        if COLLECTION_NAME in existing:
+
+            self.logger.info(
+                f"Collection '{COLLECTION_NAME}' already exists."
+            )
+
             return
 
         self.client.create_collection(
@@ -54,35 +88,51 @@ class VectorStore:
             ),
         )
 
-        print(f"Collection '{COLLECTION_NAME}' created successfully!")
+        self.logger.info(
+            f"Collection '{COLLECTION_NAME}' created."
+        )
 
     def store_embeddings(
         self,
         chunks: list[Chunk],
         embeddings: list[list[float]],
-    ):
+    ) -> None:
         """
-        Store chunk embeddings inside Qdrant using batched uploads.
+        Store embeddings in Qdrant using batched uploads.
         """
+
+        if not chunks:
+
+            self.logger.warning(
+                "No chunks provided for indexing."
+            )
+
+            return
+
+        if len(chunks) != len(embeddings):
+
+            raise ValueError(
+                "Chunks and embeddings must have the same length."
+            )
 
         points = []
 
         for chunk, embedding in zip(chunks, embeddings):
 
-            point = PointStruct(
-                id=str(uuid.uuid4()),
-                vector=embedding,
-                payload={
-                    "id": chunk.id,
-                    "title": chunk.document_title,
-                    "content": chunk.content,
-                    "url": chunk.source_url,
-                    "chunk_number": chunk.chunk_number,
-                    "metadata": chunk.metadata,
-                },
+            points.append(
+                PointStruct(
+                    id=str(uuid.uuid4()),
+                    vector=embedding,
+                    payload={
+                        "id": chunk.id,
+                        "title": chunk.document_title,
+                        "content": chunk.content,
+                        "url": chunk.source_url,
+                        "chunk_number": chunk.chunk_number,
+                        "metadata": chunk.metadata,
+                    },
+                )
             )
-
-            points.append(point)
 
         total_batches = (
             len(points) + UPSERT_BATCH_SIZE - 1
@@ -99,7 +149,7 @@ class VectorStore:
 
             batch = points[start:end]
 
-            print(
+            self.logger.info(
                 f"Uploading batch "
                 f"{batch_number + 1}/{total_batches} "
                 f"({len(batch)} vectors)"
@@ -110,7 +160,9 @@ class VectorStore:
                 points=batch,
             )
 
-        print(f"\nStored {len(points)} embeddings.")
+        self.logger.info(
+            f"Stored {len(points)} embeddings."
+        )
 
     def search(
         self,
@@ -118,8 +170,12 @@ class VectorStore:
         limit: int = 3,
     ):
         """
-        Search for similar document chunks.
+        Search for the most relevant document chunks.
         """
+
+        self.logger.info(
+            f"Searching top {limit} chunks."
+        )
 
         results = self.client.query_points(
             collection_name=COLLECTION_NAME,
@@ -127,27 +183,36 @@ class VectorStore:
             limit=limit,
         )
 
+        self.logger.info(
+            f"Retrieved {len(results.points)} chunks."
+        )
+
         return results.points
 
-    def delete_collection(self):
+    def delete_collection(self) -> None:
         """
         Delete the collection if it exists.
         """
 
         collections = self.client.get_collections().collections
 
-        existing_collections = [
-            c.name for c in collections
-        ]
+        existing = {
+            collection.name
+            for collection in collections
+        }
 
-        if COLLECTION_NAME in existing_collections:
+        if COLLECTION_NAME not in existing:
 
-            self.client.delete_collection(
-                collection_name=COLLECTION_NAME,
+            self.logger.info(
+                "Collection does not exist."
             )
 
-            print(f"Deleted '{COLLECTION_NAME}'.")
+            return
 
-        else:
+        self.client.delete_collection(
+            collection_name=COLLECTION_NAME,
+        )
 
-            print("Collection does not exist.")
+        self.logger.info(
+            f"Deleted '{COLLECTION_NAME}'."
+        )

@@ -98,3 +98,8 @@ UPSERT_BATCH_SIZE = int(
         default="100"
     )
 )
+
+
+ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+]

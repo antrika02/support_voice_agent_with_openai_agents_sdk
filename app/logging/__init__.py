@@ -1,0 +1,1 @@
+from app.logging.logger import get_logger

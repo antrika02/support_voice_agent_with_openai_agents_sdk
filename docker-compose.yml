@@ -1,0 +1,15 @@
+services:
+
+  ai-documentation-assistant:
+
+    build: .
+
+    container_name: ai-documentation-assistant
+
+    ports:
+      - "8000:8000"
+
+    env_file:
+      - .env
+
+    restart: unless-stopped

@@ -1,24 +1,33 @@
-from app.retrieval.retriever import Retriever
-from app.rag.prompt_builder import PromptBuilder
 from app.llm.factory import LLMFactory
+from app.logging import get_logger
 from app.memory.conversation import Conversation
 from app.rag.confidence import ConfidenceCalculator
-from config import MAX_CONVERSATION_MESSAGES
+from app.rag.prompt_builder import PromptBuilder
 from app.response import (
-    Source,
     RAGResponse,
+    Source,
 )
+from app.retrieval.retriever import Retriever
+from config import MAX_CONVERSATION_MESSAGES
 
 
 class RAGEngine:
     """
-    Complete Retrieval-Augmented Generation pipeline.
+    Complete Retrieval-Augmented Generation (RAG) pipeline.
+
+    Responsibilities:
+    - Retrieve relevant documentation
+    - Build the LLM prompt
+    - Generate an answer
+    - Calculate confidence
+    - Build the final response
     """
 
     def __init__(self):
         self.retriever = Retriever()
         self.prompt_builder = PromptBuilder()
         self.llm = LLMFactory.create()
+        self.logger = get_logger(__name__)
 
         self.conversation = Conversation(
             max_messages=MAX_CONVERSATION_MESSAGES
@@ -26,57 +35,106 @@ class RAGEngine:
 
     def answer(self, question: str) -> RAGResponse:
         """
-        Answer a user's question using RAG.
+        Answer a user's question using the RAG pipeline.
         """
 
         self.conversation.add_user_message(question)
 
         results = self.retriever.retrieve(question)
 
+        if not results:
+
+            self.logger.warning(
+                "No relevant documents retrieved."
+            )
+
+            return RAGResponse(
+                answer="I couldn't find relevant information in the documentation.",
+                sources=[],
+                confidence=0.0,
+                contexts=[],
+            )
+
         confidence = ConfidenceCalculator.calculate(results)
 
         prompt = self.prompt_builder.build(
             question=question,
             results=results,
-            history=self.conversation.history()
+            history=self.conversation.history(),
         )
 
-        print("=" * 80)
-        print(f"Prompt length: {len(prompt)} characters")
-        print("=" * 80)
+        self.logger.info(
+            f"Prompt length: {len(prompt)} characters"
+        )
 
-        answer = self.llm.generate(prompt)
+        contexts = self._extract_contexts(results)
 
-        contexts = [
-            result.payload["content"]
-            for result in results
-        ]
+        self.logger.info(
+            f"Retrieved {len(contexts)} context chunks"
+        )
+
+        self.logger.info(
+            f"Confidence score: {confidence:.2f}"
+        )
+
+        try:
+
+            answer = self.llm.generate(prompt)
+
+        except RuntimeError as e:
+
+            self.logger.warning(str(e))
+
+            answer = (
+                "⚠️ Gemini is currently experiencing high demand.\n\n"
+                "Please try again in a few moments."
+            )
 
         self.conversation.add_assistant_message(answer)
 
-        sources = []
+        return RAGResponse(
+            answer=answer,
+            sources=self._extract_sources(results),
+            confidence=confidence,
+            contexts=contexts,
+        )
 
+    @staticmethod
+    def _extract_contexts(results) -> list[str]:
+        """
+        Extract retrieved document contents.
+        """
+
+        return [
+            result.payload.get("content", "")
+            for result in results
+        ]
+
+    @staticmethod
+    def _extract_sources(results) -> list[Source]:
+        """
+        Extract unique document sources.
+        """
+
+        sources = []
         seen_urls = set()
 
         for result in results:
 
-            url = result.payload["url"]
+            payload = result.payload
 
-            if url in seen_urls:
+            url = payload.get("url")
+
+            if not url or url in seen_urls:
                 continue
 
             seen_urls.add(url)
 
             sources.append(
                 Source(
-                    title=result.payload["title"],
-                    url=url
+                    title=payload.get("title", "Unknown"),
+                    url=url,
                 )
             )
 
-        return RAGResponse(
-            answer=answer,
-            sources=sources,
-            confidence=confidence,
-            contexts=contexts,
-        )
+        return sources
