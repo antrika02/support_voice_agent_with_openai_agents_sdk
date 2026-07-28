@@ -1154,12 +1154,6 @@ git push origin feature/my-feature
 
 ---
 
-# 📄 License
-
-This project is released under the MIT License.
-
----
-
 # 👨‍💻 Author
 
 **Antrika Kashyap**
@@ -1170,14 +1164,3 @@ If you found this project useful, consider giving it a ⭐ on GitHub!
 
 ---
 
-## ⭐ Project Vision
-
-The long-term vision is to build a production-grade, enterprise-ready Customer Support Voice Agent capable of:
-
-- Understanding spoken language
-- Retrieving knowledge from enterprise documentation
-- Generating context-aware responses
-- Speaking naturally with users
-- Scaling as a modern AI-powered customer support platform
-
-This repository represents the complete engineering journey of building such a system from first principles, with an emphasis on understanding the architecture behind Retrieval-Augmented Generation rather than treating it as a black box.
