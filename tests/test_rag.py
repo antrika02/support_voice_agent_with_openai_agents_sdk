@@ -2,14 +2,18 @@ from app.rag.rag_engine import RAGEngine
 
 rag = RAGEngine()
 
-question = "How does Python support object-oriented programming?"
+response = rag.answer(
+    "How does Python support object-oriented programming?"
+)
 
-answer = rag.answer(question)
+print("=" * 80)
+print("CONTEXTS")
+print("=" * 80)
 
-print("=" * 60)
-print("QUESTION:")
-print(question)
+for i, context in enumerate(response.contexts, start=1):
+    print(f"\nContext {i}")
+    print("-" * 40)
+    print(context[:300])
 
-print("\nANSWER:")
-print(answer)
-print("=" * 60)
+print("=" * 80)
+print("NUMBER OF CONTEXTS:", len(response.contexts))

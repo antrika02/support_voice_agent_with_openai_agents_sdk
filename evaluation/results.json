@@ -1,0 +1,67 @@
+[
+    {
+        "question": "How does Python support object-oriented programming?",
+        "ground_truth": "Python supports object-oriented programming through classes and objects. It provides inheritance, encapsulation, and polymorphism.",
+        "prediction": "Python supports object-oriented programming through classes and objects. This allows developers to create reusable classes, instantiate objects, and use inheritance, encapsulation, and polymorphism to organize code effectively.",
+        "contexts": [],
+        "sources": [
+            {
+                "title": "Python Programming",
+                "url": "https://python.org"
+            }
+        ],
+        "confidence": 0.905197517
+    },
+    {
+        "question": "What is Python used for?",
+        "ground_truth": "Python is used for web development, automation, artificial intelligence, data science, scripting, and many other applications.",
+        "prediction": "Based on the documentation, Python is widely used for:\n\n* Web development\n* Data science\n* Artificial intelligence\n* Automation\n* Scripting",
+        "contexts": [],
+        "sources": [
+            {
+                "title": "Python Programming",
+                "url": "https://python.org"
+            }
+        ],
+        "confidence": 0.85847871
+    },
+    {
+        "question": "Does Python support functional programming?",
+        "ground_truth": "Yes. Python supports functional programming using lambda expressions, map(), filter(), comprehensions, and first-class functions.",
+        "prediction": "Yes, Python supports functional programming using functions such as `map()`, `filter()`, lambda expressions, and comprehensions.",
+        "contexts": [],
+        "sources": [
+            {
+                "title": "Python Programming",
+                "url": "https://python.org"
+            }
+        ],
+        "confidence": 0.881534874
+    },
+    {
+        "question": "How does Python manage memory?",
+        "ground_truth": "Python automatically manages memory using reference counting and a garbage collector.",
+        "prediction": "Python manages memory automatically through reference counting and a garbage collector that frees unused memory automatically.",
+        "contexts": [],
+        "sources": [
+            {
+                "title": "Python Programming",
+                "url": "https://python.org"
+            }
+        ],
+        "confidence": 0.83398821
+    },
+    {
+        "question": "What makes Python easy to learn?",
+        "ground_truth": "Python has simple syntax and high readability, making it easy to learn.",
+        "prediction": "Based on the documentation, Python is known for its simple syntax and readability.",
+        "contexts": [],
+        "sources": [
+            {
+                "title": "Python Programming",
+                "url": "https://python.org"
+            }
+        ],
+        "confidence": 0.7813835759999999
+    }
+]
