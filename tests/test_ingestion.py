@@ -2,4 +2,6 @@ from app.ingestion.manager import KnowledgeBaseManager
 
 manager = KnowledgeBaseManager()
 
-manager.ingest()
+manager.ingest(
+    "https://docs.stripe.com"
+)

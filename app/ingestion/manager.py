@@ -33,7 +33,7 @@ class KnowledgeBaseManager:
 
         self.vector_store.connect()
 
-    def ingest(self):
+    def ingest(self, crawl_url: str):
         """
         Discover → Crawl → Chunk → Embed → Store
         """
@@ -41,7 +41,7 @@ class KnowledgeBaseManager:
         print("Step 1: Discovering documentation pages...")
 
         urls = self.discovery.discover(
-            CRAWL_URL,
+            crawl_url,
             max_pages=50
         )
 
