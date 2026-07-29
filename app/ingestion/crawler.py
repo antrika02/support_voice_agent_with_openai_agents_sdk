@@ -23,12 +23,12 @@ class DocumentationCrawler:
         metadata = getattr(response, "metadata", {})
 
         document = Document(
-            title=getattr(metadata, "title", ""),
+            title=getattr(metadata, "title", None) or "",
             content=markdown,
-            url=getattr(metadata, "sourceURL", url),
-            description=getattr(metadata, "description", ""),
-            language=getattr(metadata, "language", "en"),
-            metadata={}
+            url=getattr(metadata, "sourceURL", None) or url,
+            description=getattr(metadata, "description", None) or "",
+            language=getattr(metadata, "language", None) or "en",
+            metadata={},
         )
 
         return [document]

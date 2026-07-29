@@ -1,3 +1,4 @@
+import ConfidenceBar from "./ConfidenceBar";
 import type { ChatResponse } from "../types/chat";
 
 interface Props {
@@ -15,15 +16,53 @@ export default function ChatWindow({
 
     return (
 
-        <main className="flex-1 overflow-y-auto p-8">
+        <main className="flex-1 overflow-y-auto bg-slate-100 p-8">
 
-            <div className="mx-auto max-w-4xl">
+            <div className="mx-auto w-full max-w-6xl">
 
                 {!response && !loading && (
 
-                    <div className="rounded-xl bg-white p-8 shadow">
+                    <div className="rounded-xl bg-white p-10 shadow">
 
-                        Ask me anything about your documentation.
+                        <h2 className="mb-4 text-3xl font-bold">
+
+                            👋 Welcome to the AI Documentation Assistant
+
+                        </h2>
+
+                        <p className="mb-6 text-gray-600">
+
+                            Ask questions about your documentation and receive
+                            grounded answers generated using Retrieval-Augmented
+                            Generation (RAG) with source citations.
+
+                        </p>
+
+                        <div className="space-y-2">
+
+                            <p className="font-semibold">
+
+                                Try asking:
+
+                            </p>
+
+                            <ul className="list-disc space-y-2 pl-6 text-gray-700">
+
+                                <li>
+                                    What is Stripe?
+                                </li>
+
+                                <li>
+                                    How do webhooks work?
+                                </li>
+
+                                <li>
+                                    How do I test payments?
+                                </li>
+
+                            </ul>
+
+                        </div>
 
                     </div>
 
@@ -31,9 +70,19 @@ export default function ChatWindow({
 
                 {loading && (
 
-                    <div className="rounded-xl bg-white p-8 shadow">
+                    <div className="rounded-xl bg-white p-10 shadow">
 
-                        Thinking...
+                        <h2 className="mb-4 text-2xl font-bold">
+
+                            Thinking...
+
+                        </h2>
+
+                        <p className="text-gray-600">
+
+                            Searching documentation and generating an answer...
+
+                        </p>
 
                     </div>
 
@@ -45,13 +94,13 @@ export default function ChatWindow({
 
                         <div className="rounded-xl bg-white p-8 shadow">
 
-                            <h2 className="mb-4 text-xl font-bold">
+                            <h2 className="mb-4 text-2xl font-bold">
 
                                 Answer
 
                             </h2>
 
-                            <p className="whitespace-pre-wrap leading-8">
+                            <p className="whitespace-pre-wrap leading-8 text-gray-800">
 
                                 {response.answer}
 
@@ -61,45 +110,51 @@ export default function ChatWindow({
 
                         <div className="rounded-xl bg-white p-6 shadow">
 
-                            <strong>
-
-                                Confidence:
-
-                            </strong>{" "}
-
-                            {(response.confidence * 100).toFixed(1)}%
+                            <ConfidenceBar
+                                confidence={response.confidence}
+                            />
 
                         </div>
 
                         <div className="rounded-xl bg-white p-6 shadow">
 
-                            <h3 className="mb-4 text-lg font-bold">
+                            <h2 className="mb-4 text-2xl font-bold">
 
                                 Sources
 
-                            </h3>
+                            </h2>
 
-                            {response.sources.map((source) => (
+                            <div className="space-y-4">
 
-                                <div
-                                    key={source.url}
-                                    className="mb-3"
-                                >
+                                {response.sources.map((source) => (
 
-                                    <a
-                                        href={source.url}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="text-blue-600 hover:underline"
+                                    <div
+                                        key={source.url}
+                                        className="rounded-lg border border-gray-200 p-4 hover:bg-gray-50"
                                     >
 
-                                        {source.title}
+                                        <a
+                                            href={source.url}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="font-semibold text-blue-600 hover:underline"
+                                        >
 
-                                    </a>
+                                            {source.title}
 
-                                </div>
+                                        </a>
 
-                            ))}
+                                        <p className="mt-2 break-all text-sm text-gray-500">
+
+                                            {source.url}
+
+                                        </p>
+
+                                    </div>
+
+                                ))}
+
+                            </div>
 
                         </div>
 

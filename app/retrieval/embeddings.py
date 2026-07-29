@@ -7,11 +7,6 @@ from app.models import Chunk
 class EmbeddingGenerator:
     """
     Generates vector embeddings using FastEmbed.
-
-    Responsibilities:
-    - Embed individual text
-    - Embed document chunks
-    - Batch embed multiple chunks efficiently
     """
 
     def __init__(self):
@@ -27,9 +22,6 @@ class EmbeddingGenerator:
         self,
         text: str,
     ) -> list[float]:
-        """
-        Generate an embedding for arbitrary text.
-        """
 
         if not text.strip():
             return []
@@ -44,21 +36,16 @@ class EmbeddingGenerator:
         self,
         chunk: Chunk,
     ) -> list[float]:
-        """
-        Generate an embedding for a single chunk.
-        """
 
         return self.embed_text(chunk.content)
 
     def embed_chunks(
         self,
         chunks: list[Chunk],
+        batch_size: int = 32,
     ) -> list[list[float]]:
         """
-        Generate embeddings for multiple chunks in a single batch.
-
-        FastEmbed performs significantly better when embedding
-        batches instead of one document at a time.
+        Generate embeddings in batches to avoid high memory usage.
         """
 
         if not chunks:
@@ -68,14 +55,31 @@ class EmbeddingGenerator:
             f"Generating embeddings for {len(chunks)} chunks."
         )
 
-        texts = [
-            chunk.content
-            for chunk in chunks
-        ]
+        all_embeddings = []
 
-        embeddings = self.model.embed(texts)
+        for start in range(0, len(chunks), batch_size):
 
-        return [
-            embedding.tolist()
-            for embedding in embeddings
-        ]
+            end = min(start + batch_size, len(chunks))
+
+            self.logger.info(
+                f"Embedding batch {start // batch_size + 1} "
+                f"({start}-{end-1})"
+            )
+
+            texts = [
+                chunk.content
+                for chunk in chunks[start:end]
+            ]
+
+            embeddings = self.model.embed(texts)
+
+            all_embeddings.extend(
+                embedding.tolist()
+                for embedding in embeddings
+            )
+
+        self.logger.info(
+            "Embedding generation complete."
+        )
+
+        return all_embeddings

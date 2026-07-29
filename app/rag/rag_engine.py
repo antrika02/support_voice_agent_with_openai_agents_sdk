@@ -132,7 +132,7 @@ class RAGEngine:
 
             sources.append(
                 Source(
-                    title=payload.get("title", "Unknown"),
+                    title=payload.get("title") or "Unknown",
                     url=url,
                 )
             )
