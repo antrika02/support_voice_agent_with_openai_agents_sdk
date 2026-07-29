@@ -1,85 +1,140 @@
-import time
-
-from google import genai
-from google.genai.errors import (
-    ClientError,
-    ServerError,
+from fastapi import (
+    APIRouter,
+    Depends,
+    status,
 )
 
-from app.llm.base import BaseLLM
+from app.api.dependencies import (
+    get_rag_engine,
+    get_metrics_service,
+    get_ingestion_manager,
+)
+
+from app.api.metrics import MetricsService
+from app.api.schemas import (
+    ChatRequest,
+    ChatResponse,
+    SourceResponse,
+    IngestionRequest,
+)
+
+from app.ingestion.manager import KnowledgeBaseManager
 from app.logging import get_logger
+from app.rag.rag_engine import RAGEngine
 
-from config import (
-    GEMINI_API_KEY,
-    GEMINI_MODEL,
-)
 
 logger = get_logger(__name__)
 
+router = APIRouter()
 
-class GeminiLLM(BaseLLM):
+
+@router.post(
+    "/chat",
+    response_model=ChatResponse,
+    summary="Ask a documentation question",
+    description=(
+        "Runs the Retrieval-Augmented Generation (RAG) pipeline "
+        "to answer questions using the indexed documentation."
+    ),
+)
+def chat(
+    request: ChatRequest,
+    rag: RAGEngine = Depends(get_rag_engine),
+) -> ChatResponse:
     """
-    Gemini implementation of the BaseLLM interface.
+    Answer a documentation question using the RAG pipeline.
     """
 
-    def __init__(self):
-        self.client = genai.Client(
-            api_key=GEMINI_API_KEY
-        )
+    logger.info("Received chat request.")
 
-        self.model = GEMINI_MODEL
+    response = rag.answer(request.question)
 
-    def generate(self, prompt: str) -> str:
-        """
-        Generate an answer using Gemini.
+    logger.info(
+        "Successfully generated response "
+        f"(confidence={response.confidence:.2f})"
+    )
 
-        Retries automatically if Gemini is temporarily unavailable.
-        """
+    return ChatResponse(
+        answer=response.answer,
+        confidence=response.confidence,
+        sources=[
+            SourceResponse(
+                title=source.title,
+                url=source.url,
+            )
+            for source in response.sources
+        ],
+    )
 
-        retries = 3
 
-        for attempt in range(retries):
+@router.get(
+    "/health",
+    summary="Health check",
+    description="Returns the health status of the application.",
+)
+def health():
+    """
+    Health check endpoint.
+    """
 
-            try:
+    logger.info("Health endpoint called.")
 
-                response = self.client.models.generate_content(
-                    model=self.model,
-                    contents=prompt,
-                )
+    return {
+        "status": "healthy",
+        "service": "AI Documentation Assistant",
+        "version": "1.0.0",
+    }
 
-                if response.text:
-                    return response.text
 
-                raise RuntimeError(
-                    "Gemini returned an empty response."
-                )
+@router.get(
+    "/metrics",
+    summary="Application metrics",
+    description="Returns runtime metrics for the RAG service.",
+)
+def metrics_endpoint(
+    metrics: MetricsService = Depends(
+        get_metrics_service,
+    ),
+):
+    """
+    Return application metrics.
+    """
 
-            except ServerError:
+    logger.info("Metrics endpoint called.")
 
-                logger.warning(
-                    f"Gemini unavailable ({attempt + 1}/{retries})"
-                )
+    return metrics.get_metrics()
 
-                if attempt < retries - 1:
-                    time.sleep(2)
-                    continue
 
-                raise RuntimeError(
-                    "Gemini service temporarily unavailable."
-                )
+@router.post(
+    "/ingest",
+    status_code=status.HTTP_202_ACCEPTED,
+    summary="Ingest documentation",
+    description=(
+        "Discovers, crawls, chunks, embeds and indexes "
+        "documentation into the vector database."
+    ),
+)
+def ingest(
+    request: IngestionRequest,
+    ingestion: KnowledgeBaseManager = Depends(
+        get_ingestion_manager,
+    ),
+):
+    """
+    Trigger documentation ingestion.
+    """
 
-            except ClientError as e:
+    logger.info(
+        f"Received ingestion request for: {request.url}"
+    )
 
-                logger.error(f"Gemini client error: {e}")
+    ingestion.ingest(request.url)
 
-                raise RuntimeError(
-                    "Gemini request failed."
-                )
+    logger.info(
+        "Knowledge base indexed successfully."
+    )
 
-            except Exception as e:
-
-                logger.exception(e)
-
-                raise RuntimeError(
-                    "Unexpected error while generating response."
-                )
+    return {
+        "status": "success",
+        "message": "Knowledge base indexed successfully.",
+    }
