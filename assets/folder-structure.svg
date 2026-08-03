@@ -1,0 +1,38 @@
+<svg viewBox="0 0 560 704" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <rect x="0" y="0" width="560" height="704" fill="#ffffff"/>
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="6" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#94a3b8"/>
+    </marker>
+  </defs>
+  <text x="280.0" y="34" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="22" font-weight="700" fill="#0f172a">Project Structure</text>
+<rect x="30" y="60" width="500" height="614" rx="12" fill="#0f172a"/>
+<circle cx="52" cy="82" r="6" fill="#ef4444"/>
+<circle cx="72" cy="82" r="6" fill="#f59e0b"/>
+<circle cx="92" cy="82" r="6" fill="#22c55e"/>
+<line x1="30" y1="102" x2="530" y2="102" stroke="#1e293b" stroke-width="1.5"/>
+<text x="54" y="136" font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="14.5" font-weight="700" fill="#f1f5f9" xml:space="preserve">AI Documentation Assistant</text>
+<text x="300.2" y="136" font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="13" fill="#64748b" font-style="italic">// root</text>
+<text x="54" y="162" font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="14.5" font-weight="400" fill="#cbd5e1" xml:space="preserve">├── frontend</text>
+<text x="178.39999999999998" y="162" font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="13" fill="#64748b" font-style="italic">// React + TypeScript</text>
+<text x="54" y="188" font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="14.5" font-weight="400" fill="#cbd5e1" xml:space="preserve">│   ├── Components</text>
+<text x="54" y="214" font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="14.5" font-weight="400" fill="#cbd5e1" xml:space="preserve">│   ├── Hooks</text>
+<text x="54" y="240" font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="14.5" font-weight="400" fill="#cbd5e1" xml:space="preserve">│   ├── Pages</text>
+<text x="54" y="266" font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="14.5" font-weight="400" fill="#cbd5e1" xml:space="preserve">│   └── API Client</text>
+<text x="54" y="292" font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="14.5" font-weight="400" fill="#cbd5e1" xml:space="preserve">│</text>
+<text x="54" y="318" font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="14.5" font-weight="400" fill="#cbd5e1" xml:space="preserve">├── backend</text>
+<text x="169.7" y="318" font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="13" fill="#64748b" font-style="italic">// FastAPI</text>
+<text x="54" y="344" font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="14.5" font-weight="400" fill="#cbd5e1" xml:space="preserve">│   ├── API Endpoints</text>
+<text x="54" y="370" font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="14.5" font-weight="400" fill="#cbd5e1" xml:space="preserve">│   ├── Ingestion</text>
+<text x="54" y="396" font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="14.5" font-weight="400" fill="#cbd5e1" xml:space="preserve">│   ├── Retrieval</text>
+<text x="54" y="422" font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="14.5" font-weight="400" fill="#cbd5e1" xml:space="preserve">│   ├── LLM</text>
+<text x="54" y="448" font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="14.5" font-weight="400" fill="#cbd5e1" xml:space="preserve">│   ├── Prompt Builder</text>
+<text x="54" y="474" font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="14.5" font-weight="400" fill="#cbd5e1" xml:space="preserve">│   └── Evaluation</text>
+<text x="54" y="500" font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="14.5" font-weight="400" fill="#cbd5e1" xml:space="preserve">│</text>
+<text x="54" y="526" font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="14.5" font-weight="400" fill="#cbd5e1" xml:space="preserve">├── Vector Database</text>
+<text x="54" y="552" font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="14.5" font-weight="400" fill="#cbd5e1" xml:space="preserve">│   └── Qdrant</text>
+<text x="54" y="578" font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="14.5" font-weight="400" fill="#cbd5e1" xml:space="preserve">│</text>
+<text x="54" y="604" font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="14.5" font-weight="400" fill="#cbd5e1" xml:space="preserve">├── Evaluation</text>
+<text x="54" y="630" font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="14.5" font-weight="400" fill="#cbd5e1" xml:space="preserve">│</text>
+<text x="54" y="656" font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="14.5" font-weight="400" fill="#cbd5e1" xml:space="preserve">└── Tests</text>
+</svg>

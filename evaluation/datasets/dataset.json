@@ -1,0 +1,22 @@
+[
+    {
+        "question": "How does Python support object-oriented programming?",
+        "ground_truth": "Python supports object-oriented programming through classes and objects. It provides inheritance, encapsulation, and polymorphism."
+    },
+    {
+        "question": "What is Python used for?",
+        "ground_truth": "Python is used for web development, automation, artificial intelligence, data science, scripting, and many other applications."
+    },
+    {
+        "question": "Does Python support functional programming?",
+        "ground_truth": "Yes. Python supports functional programming using lambda expressions, map(), filter(), comprehensions, and first-class functions."
+    },
+    {
+        "question": "How does Python manage memory?",
+        "ground_truth": "Python automatically manages memory using reference counting and a garbage collector."
+    },
+    {
+        "question": "What makes Python easy to learn?",
+        "ground_truth": "Python has simple syntax and high readability, making it easy to learn."
+    }
+]

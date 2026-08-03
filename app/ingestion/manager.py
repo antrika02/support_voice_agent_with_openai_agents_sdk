@@ -1,19 +1,27 @@
-from app.discovery import DocumentationDiscovery
-from app.crawler import DocumentationCrawler
+import re
+import time
+
+from firecrawl.v2.utils.error_handler import RateLimitError
+
 from app.chunker import DocumentChunker
-from app.embeddings import EmbeddingGenerator
-from app.vector_store import VectorStore
+from app.ingestion.crawler import DocumentationCrawler
+from app.ingestion.discovery import DocumentationDiscovery
+from app.logging import get_logger
+from app.retrieval.embeddings import EmbeddingGenerator
+from app.retrieval.vector_store import VectorStore
 
 from config import (
-    CRAWL_URL,
-    QDRANT_URL,
     QDRANT_API_KEY,
+    QDRANT_URL,
 )
 
 
 class KnowledgeBaseManager:
     """
     Complete knowledge base ingestion pipeline.
+
+    Flow:
+    Discover -> Crawl -> Chunk -> Embed -> Store
     """
 
     def __init__(self):
@@ -28,48 +36,97 @@ class KnowledgeBaseManager:
 
         self.vector_store = VectorStore(
             QDRANT_URL,
-            QDRANT_API_KEY
+            QDRANT_API_KEY,
         )
 
-        self.vector_store.connect()
+        self.logger = get_logger(__name__)
 
-    def ingest(self):
+    def ingest(self, crawl_url: str):
         """
         Discover → Crawl → Chunk → Embed → Store
         """
 
-        print("Step 1: Discovering documentation pages...")
-
-        urls = self.discovery.discover(
-            CRAWL_URL,
-            max_pages=50
+        self.logger.info(
+            "Discovering documentation pages..."
         )
 
-        print(f"Discovered {len(urls)} pages.")
+        urls = self.discovery.discover(
+            crawl_url,
+            max_pages=10,
+        )
+
+        self.logger.info(
+            f"Discovered {len(urls)} pages."
+        )
 
         documents = []
 
-        print("Step 2: Crawling pages...")
+        self.logger.info(
+            "Crawling documentation pages..."
+        )
 
         for index, url in enumerate(urls, start=1):
 
-            print(f"[{index}/{len(urls)}] {url}")
+            self.logger.info(
+                f"[{index}/{len(urls)}] {url}"
+            )
 
-            try:
+            max_retries = 3
+            attempt = 0
 
-                documents.extend(
-                    self.crawler.crawl_page(url)
-                )
+            while attempt < max_retries:
 
-            except Exception as e:
+                try:
 
-                print(f"Failed: {e}")
+                    documents.extend(
+                        self.crawler.crawl_page(url)
+                    )
 
-        print(f"Crawled {len(documents)} document(s).")
+                    break
+
+                except RateLimitError as e:
+
+                    attempt += 1
+
+                    message = str(e)
+
+                    match = re.search(
+                        r"retry after (\d+)s",
+                        message,
+                        re.IGNORECASE,
+                    )
+
+                    wait_time = (
+                        int(match.group(1))
+                        if match
+                        else 30
+                    )
+
+                    self.logger.warning(
+                        f"Firecrawl rate limited. "
+                        f"Retry {attempt}/{max_retries} "
+                        f"after {wait_time} seconds."
+                    )
+
+                    time.sleep(wait_time + 1)
+
+                except Exception as e:
+
+                    self.logger.exception(
+                        f"Failed to crawl {url}: {e}"
+                    )
+
+                    break
+
+        self.logger.info(
+            f"Crawled {len(documents)} documents."
+        )
 
         chunks = []
 
-        print("Step 3: Chunking...")
+        self.logger.info(
+            "Chunking documents..."
+        )
 
         for document in documents:
 
@@ -77,23 +134,46 @@ class KnowledgeBaseManager:
                 self.chunker.chunk_document(document)
             )
 
-        print(f"Created {len(chunks)} chunk(s).")
+        self.logger.info(
+            f"Created {len(chunks)} chunks."
+        )
 
-        print("Step 4: Generating embeddings...")
+        self.logger.info(
+            "Generating embeddings..."
+        )
 
         embeddings = self.embedder.embed_chunks(chunks)
 
-        print("Step 5: Creating collection...")
-
-        self.vector_store.create_collection(
-            vector_size=384
+        self.logger.info(
+            "Connecting to Qdrant..."
         )
 
-        print("Step 6: Uploading to Qdrant...")
+        self.vector_store.connect()
+
+        # Temporary: remove the old collection once
+        self.logger.info(
+            "Deleting existing collection..."
+        )
+
+        self.vector_store.delete_collection()
+
+        self.logger.info(
+            "Creating collection..."
+        )
+
+        self.vector_store.create_collection(
+            vector_size=len(embeddings[0]),
+        )
+
+        self.logger.info(
+            "Uploading embeddings..."
+        )
 
         self.vector_store.store_embeddings(
             chunks,
-            embeddings
+            embeddings,
         )
 
-        print("Knowledge base successfully indexed.")
+        self.logger.info(
+            "Knowledge base successfully indexed."
+        )

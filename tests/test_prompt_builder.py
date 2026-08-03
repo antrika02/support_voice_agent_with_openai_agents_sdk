@@ -1,5 +1,5 @@
-from app.prompt_builder import PromptBuilder
-from app.retriever import Retriever
+from app.rag.prompt_builder import PromptBuilder
+from app.retrieval.retriever import Retriever
 
 retriever = Retriever()
 

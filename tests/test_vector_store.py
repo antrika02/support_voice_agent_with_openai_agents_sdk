@@ -3,7 +3,7 @@ from config import (
     QDRANT_API_KEY,
 )
 
-from app.vector_store import VectorStore
+from app.retrieval.vector_store import VectorStore
 
 store = VectorStore(
     url=QDRANT_URL,

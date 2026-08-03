@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import List
 
 
 @dataclass
@@ -11,10 +12,13 @@ class Source:
 
 
 @dataclass
+
 class RAGResponse:
-    """
-    Represents the final response returned by the RAG engine.
-    """
+
     answer: str
-    sources: list[Source]
-    confidence: float | None = None
+
+    sources: List[Source]
+
+    confidence: float
+
+    contexts: List[str] 

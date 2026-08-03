@@ -1,5 +1,5 @@
 from app.models import Chunk
-from app.embeddings import EmbeddingGenerator
+from app.retrieval.embeddings import EmbeddingGenerator
 
 chunk = Chunk(
     id="1",
