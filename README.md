@@ -92,7 +92,9 @@ From a raw documentation URL to searchable vectors:
 From a user's question to a cited answer:
 
 <p align="center">
-  <img src="assets/system-architecture.svg" width="85%" alt="System architecture: query flow from user question to cited answer">
+
+  <img src="assets/sys_architecture.png" width="85%" alt="System Architecture">
+
 </p>
 
 The **React frontend** sends the question to `POST /chat`. Inside **FastAPI**, the request passes through validation and conversation management before reaching the **Prompt Builder**, which triggers a **FastEmbed** query embedding. That embedding is used to run a **top-K semantic search in Qdrant**, and the most relevant chunks flow back into the Prompt Builder, which combines context + query and sends it to **Gemini 2.5 Flash**. The **Response Formatter** packages the answer, confidence score, and source citations, which render directly in the chat UI.
@@ -113,36 +115,12 @@ A sequence view of the same round trip: `React Frontend → FastAPI → Qdrant (
   <img src="assets/folder-structure.svg" width="65%" alt="Project folder structure">
 </p>
 
-```text
-AI Documentation Assistant                 // root
-├── frontend                                // React + TypeScript
-│   ├── Components
-│   ├── Hooks
-│   ├── Pages
-│   └── API Client
-│
-├── backend                                 // FastAPI
-│   ├── API Endpoints
-│   ├── Ingestion
-│   ├── Retrieval
-│   ├── LLM
-│   ├── Prompt Builder
-│   └── Evaluation
-│
-├── Vector Database
-│   └── Qdrant
-│
-├── Evaluation
-└── Tests
-```
 
 ---
 
 ## ⚙️ Technology Stack
 
-<p align="center">
-  <img src="assets/techno_stack.png" width="70%" alt="Technology stack: Frontend, Backend, AI Stack">
-</p>
+
 
 | Layer | Technology |
 |-------|------------|
@@ -240,7 +218,11 @@ Sources:
 ## 🗺 Roadmap
 
 <p align="center">
-  <img src="assets/system-design-roadmap.svg" width="80%" alt="System design roadmap: planned voice interaction">
+  <img src="assets/System_design.png" width="80%" alt="System Design Roadmap">
+</p>
+
+<p align="center">
+  <img src="assets/sys_architecture.png" width="85%" alt="System Architecture">
 </p>
 
 **🚧 Planned — Voice Interaction**
